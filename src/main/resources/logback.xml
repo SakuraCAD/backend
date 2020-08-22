@@ -1,0 +1,25 @@
+<configuration>
+    <appender name="STDOUT" class="app.sakuracad.util.CustomConsoleAppender">
+        <encoder>
+            <pattern>
+                N/A
+            </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="Sentry" class="io.sentry.logback.SentryAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+    </appender>
+
+    <root level="trace">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="Sentry"/>
+    </root>
+
+    <logger name="org.eclipse.jetty" level="INFO"/>
+    <logger name="io.netty" level="INFO"/>
+    <logger name="io.sentry" level="ERROR"/>
+    <logger name="Exposed" level="INFO"/>
+</configuration>
