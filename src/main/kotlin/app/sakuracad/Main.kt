@@ -13,16 +13,22 @@ import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.sentry.Sentry
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.time.delay
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.time.Duration
+import kotlin.time.DurationUnit
 
 object SakuraCAD {
     private val logger = LoggerFactory.getLogger(javaClass)
     val mapper = ObjectMapper().registerKotlinModule()
+    val sessions = mutableListOf<Session>()
 
     @JvmStatic fun main(args: Array<String>) {
         Sentry.init("https://269a1379a3b04da8bb8ce4096dd962a7@sentry.opxl.pw/2")
@@ -54,7 +60,7 @@ object SakuraCAD {
                 pingPeriod = Duration.ofSeconds(60) // Disabled (null) by default
                 timeout = Duration.ofSeconds(15)
                 maxFrameSize = Long.MAX_VALUE // Disabled (max value). The connection will be closed if surpassed this length.
-                masking = false
+                masking = true
             }
             routing {
                 get("/") {
@@ -62,7 +68,22 @@ object SakuraCAD {
                 }
                 webSocket("/") {
                     logger.debug("New session created")
-                    Session(this).run()
+                    val session = Session(this)
+                    sessions.add(session)
+                    session.run()
+                }
+            }
+        }
+
+        GlobalScope.launch {
+            while(true) {
+                delay(Duration.ofSeconds(30))
+
+                for (session in sessions.toList()) {
+                    if (session.closed) {
+                        sessions.remove(session)
+                        logger.trace("Cleaned up session ${session.sessionType}:${session.sessionId}")
+                    }
                 }
             }
         }

@@ -1,8 +1,7 @@
 package app.sakuracad.packet
 
 import app.sakuracad.SakuraCAD
-import app.sakuracad.packet.incoming.AuthSPacket
-import app.sakuracad.packet.incoming.TestPacket
+import app.sakuracad.packet.incoming.*
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.ktor.http.cio.websocket.Frame
@@ -15,6 +14,7 @@ class RODPacket(val r: String?, val o: String, val d: Packet) {
             val op = node.get("o")!!.textValue()
             val data = SakuraCAD.mapper.convertValue(
                 node.get("d")!!, when (op) {
+                    "704" -> SevenHundredFourPacket::class.java
                     "test" -> TestPacket::class.java
                     "auths" -> AuthSPacket::class.java
 
