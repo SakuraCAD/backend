@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit
 import kotlin.concurrent.schedule
 import kotlin.coroutines.suspendCoroutine
 
-class Session(private val connection: DefaultWebSocketServerSession) {
+class Session(val connection: DefaultWebSocketServerSession) {
     var logger: Logger = LoggerFactory.getLogger("${javaClass.name}<NONE:?>")
     var sessionType = SessionType.NONE
         set(value) {
@@ -52,7 +52,7 @@ class Session(private val connection: DefaultWebSocketServerSession) {
                 connection.close(CloseReason(CloseReason.Codes.NORMAL, "Did not authenticate within 1 minute"))
             }
         }
-        
+
         // wait for a close
         GlobalScope.launch {
             connection.closeReason.await()

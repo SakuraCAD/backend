@@ -17,6 +17,7 @@ class RODPacket(val r: String?, val o: String, val d: Packet) {
                     "704" -> SevenHundredFourPacket::class.java
                     "test" -> TestPacket::class.java
                     "auths" -> AuthSPacket::class.java
+                    "broadcast" -> BroadcastPacket::class.java
 
                     else -> throw Exception("bad packet type")
                 }
